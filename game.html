@@ -1,0 +1,165 @@
+<html>
+<p align="center">WALL BALL </p>
+ <p id="score"> </p>
+<button type="button" id="btn" onclick="newGame()"></button>
+
+<br>
+<canvas id = "gameCanvas" width="800" height="600"> 
+</canvas> 
+<script>
+	game();
+	function game(){
+	var canvas;
+	var canvasContext;
+	var ballX = 50;
+	var ballY = 50;
+	var ballVelocityX = 10;
+	var ballVelocityY = 10;
+	var paddleHandlePositionY = 300;
+	var paddleHandlePositionX=0;
+	var paddleNetPositionY = 300;
+	var paddleNetPositionX=0;
+	var points = 0;
+	var balls;
+	document.getElementById('gameCanvas').style.cursor = "none";
+	document.getElementById("btn").style.visibility ='hidden';
+	window.onload = function() { //when page finishes loading run this code
+
+		canvas = document.getElementById('gameCanvas');
+		canvasContext = canvas.getContext('2d');
+		//renders canvas/objects, 30x per second
+		refresh(callAll);
+		
+		canvas.addEventListener('mousemove', 
+			function(evt){ 
+				var mousePos = calculateMousePos(evt);
+				paddleHandlePositionY = mousePos.y;
+				paddleHandlePositionX = mousePos.x;
+				paddleNetPositionY = mousePos.y;
+				paddleNetPositionX = mousePos.x;
+			}
+		);
+	}
+	
+	function callAll() {
+	drawBoard();
+	drawPlayerHandle();
+	drawPlayerNet();
+	drawWall();
+	drawBall();
+	score();
+	}
+	//TO DO: AI balls, tennis racket
+	//Ball Movement (arrow keys)
+	document.addEventListener('keydown',function(event) { 
+	if(event.keyCode == 40 && paddleHandlePositionY < canvas.height-60 && ballVelocityY < 30) //v
+	{
+		ballVelocityY = ballVelocityY +1;
+	}
+		if(event.keyCode == 38 && paddleHandlePositionY > 0 && ballVelocityY > -30) //^
+	{
+		ballVelocityY = ballVelocityY -1;
+	}
+		if(event.keyCode == 39) //>
+	{
+		ballVelocityX = ballVelocityX*2;
+		ballVelocityY = ballVelocityY*2;
+
+	}
+		if(event.keyCode == 37) //<
+	{
+		ballVelocityX = ballVelocityX*.5;
+		ballVelocityY = ballVelocityY*.5;
+
+	}
+}, true);
+	//paddle movement (mouse)
+	function calculateMousePos(evt){
+	var rect = canvas.getBoundingClientRect();
+	var root = document.documentElement;
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return {
+		x:mouseX,
+		y:mouseY
+	};
+	}
+
+	function drawBoard() {
+		canvasContext.fillStyle = 'black';
+		canvasContext.fillRect(0,0,canvas.width,canvas.height); //from left, from top,wide, tall
+	}
+	function drawPlayerHandle()
+	{
+		canvasContext.fillStyle = 'yellow';
+		canvasContext.fillRect(paddleHandlePositionX,paddleHandlePositionY,20,60); //from left, from top,wide, tall
+
+	}
+		function drawPlayerNet()
+	{
+		canvasContext.fillStyle='gray';
+		canvasContext.arc(paddleHandlePositionX,paddleHandlePositionY, 60,0,Math.PI*1.5,true);
+	}
+	function drawWall()
+	{
+		canvasContext.fillStyle = 'gray';
+		canvasContext.fillRect(canvas.width - 20,0,20,canvas.height); //from left, from top,wide, tall
+	}
+	function drawBall(){
+	ballX = ballX + ballVelocityX;
+	ballY = ballY + ballVelocityY;
+	if(ballX >= canvas.width-40 )
+	{
+	ballVelocityX = -ballVelocityX;
+	points = points+1;
+	}
+	//gameover
+	if(ballX <40) 
+	{
+	gameOver();
+	}
+	else if( (ballX - paddleHandlePositionX+20 <= 60) && (ballX - paddleHandlePositionX+20 >= -5)  && (ballY - paddleHandlePositionY >=0) && (ballY - paddleHandlePositionY <= 80))
+	{
+		ballVelocityX = -ballVelocityX;
+	}
+	if(ballY >= canvas.height-20)
+	{
+	ballVelocityY = -ballVelocityY;
+	}
+	if(ballY <=20)
+	{
+	ballVelocityY = -ballVelocityY;
+	}
+	
+	canvasContext.fillStyle = 'red';
+	canvasContext.beginPath();
+	canvasContext.arc(ballX,ballY, 20,0,Math.PI*2,true);
+	canvasContext.fill();
+	//canvasContext.fillRect(ballX,ballY,20,20); //from left, from top,wide, tall
+	}
+	
+	function refresh(a){
+		setInterval(a,1000/30);
+	}
+	function score(){
+	document.getElementById("score").innerHTML="score: " +points;
+	}
+	function gameOver()
+	{
+	canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+	drawBoard();
+	canvasContext.fillStyle = "red";
+	canvasContext.font = "bold 65px Arial";
+	canvasContext.fillText("GAME OVER", (canvas.width / 2) - 200, (canvas.height / 2));
+	document.getElementById("btn").innerHTML="Play Again?";
+	document.getElementById("btn").style.visibility ='visible';
+	}
+	}
+	
+	
+	function newGame()
+	{
+	    window.location.reload();
+	}
+</script>
+</html>
